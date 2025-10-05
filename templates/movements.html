@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold"><i class="bi bi-arrow-left-right me-1 text-primary"></i> Product Movements</h3>
+    <a class="btn btn-primary" href="{{ url_for('add_movement') }}"><i class="bi bi-plus-lg"></i> Record Movement</a>
+  </div>
+
+  <div class="card p-3">
+    <div class="table-responsive">
+      <table class="table table-hover table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th><th>Time</th><th>Product</th><th>From</th><th>To</th><th class="text-end">Qty</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in moves %}
+            <tr>
+              <td>{{ m.movement_id }}</td>
+              <td class="small text-muted">{{ m.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>{{ m.product.name if m.product else m.product_id }}</td>
+              <td>{{ m.from_loc.name if m.from_loc else '-' }}</td>
+              <td>{{ m.to_loc.name if m.to_loc else '-' }}</td>
+              <td class="text-end fw-semibold">{{ m.qty }}</td>
+              <td>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('view_movement', movement_id=m.movement_id) }}"><i class="bi bi-eye"></i> View</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7" class="text-muted">No movements recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

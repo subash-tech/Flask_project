@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row g-3">
+    <div class="col-12 col-md-8">
+      <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h4 class="mb-1 fw-bold">Overview</h4>
+            <p class="text-muted small mb-2">Quick summary of your inventory</p>
+            <div class="d-flex gap-3">
+              <div class="me-3">
+                <div class="muted small">Products</div>
+                <div class="stat-number">{{ products_count }}</div>
+              </div>
+              <div class="me-3">
+                <div class="muted small">Locations</div>
+                <div class="stat-number">{{ locations_count }}</div>
+              </div>
+              <div>
+                <div class="muted small">Movements</div>
+                <div class="stat-number">{{ movements_count }}</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <a class="btn btn-sm btn-outline-secondary me-2" href="{{ url_for('movements') }}"><i class="bi bi-arrow-left-right"></i> All Movements</a>
+            <a class="btn btn-sm btn-primary" href="{{ url_for('add_product') }}"><i class="bi bi-plus-lg"></i> Add</a>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-12">
+            <canvas id="inventoryChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="fw-bold mb-0">Recent Movements</h5>
+          <a class="small text-muted" href="{{ url_for('movements') }}">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead class="table-light">
+              <tr><th>ID</th><th>Product</th><th>From</th><th>To</th><th>Qty</th><th>Time</th></tr>
+            </thead>
+            <tbody>
+              {% for m in recent_moves %}
+                <tr>
+                  <td>{{ m.movement_id }}</td>
+                  <td>{{ m.product.name if m.product else m.product_id }}</td>
+                  <td>{{ m.from_loc.name if m.from_loc else '-' }}</td>
+                  <td>{{ m.to_loc.name if m.to_loc else '-' }}</td>
+                  <td class="fw-semibold">{{ m.qty }}</td>
+                  <td class="text-muted small">{{ m.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="text-muted">No movements yet</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card p-3 mb-3">
+        <h6 class="fw-bold">Quick Actions</h6>
+        <div class="d-grid gap-2 mt-2">
+          <a class="btn btn-outline-primary" href="{{ url_for('add_product') }}"><i class="bi bi-bag-plus"></i> Add Product</a>
+          <a class="btn btn-outline-primary" href="{{ url_for('add_location') }}"><i class="bi bi-geo-alt"></i> Add Location</a>
+          <a class="btn btn-outline-primary" href="{{ url_for('add_movement') }}"><i class="bi bi-arrow-right-circle"></i> Record Movement</a>
+        </div>
+      </div>
+
+      <div class="card p-3">
+        <h6 class="fw-bold">Tips</h6>
+        <ul class="small mb-0">
+          <li>Click a product to view and edit details.</li>
+          <li>Use the Balance page for a grid of product/warehouse quantities.</li>
+          <li>Take screenshots for your README (Products, Movements, Balance).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block body_extra %}
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    const rows = {{ rows|tojson }};
+    // compute total per product
+    const totals = {};
+    rows.forEach(r => { totals[r.product_name] = (totals[r.product_name]||0) + r.qty; });
+    const labels = Object.keys(totals);
+    const data = labels.map(l => totals[l]);
+
+    const ctx = document.getElementById('inventoryChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Total Qty',
+          data,
+          borderRadius: 6,
+          barThickness: 28,
+          backgroundColor: labels.map((_,i) => `rgba(37,99,235,${0.7 - (i*0.05)})`)
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index' }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision:0 } }
+        }
+      }
+    });
+  </script>
+{% endblock %}

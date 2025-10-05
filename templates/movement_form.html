@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card p-3">
+    <h4 class="mb-3">{{ movement and 'View Movement' or 'Record Movement' }}</h4>
+    <form method="post" class="row g-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label">Movement ID</label>
+        <input class="form-control" name="movement_id" value="{{ movement.movement_id if movement else '' }}" {% if movement %}readonly{% endif %} required>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Timestamp (optional)</label>
+        <input class="form-control" name="timestamp" value="{{ movement.timestamp.isoformat() if movement else '' }}" {% if movement %}readonly{% endif %}>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Product</label>
+        <select class="form-select" name="product_id" {% if movement %}disabled{% endif %} required>
+          {% if movement %}
+            <option value="{{ movement.product_id }}">{{ movement.product.name if movement.product else movement.product_id }}</option>
+          {% else %}
+            <option value="">Choose product</option>
+            {% for p in products %}
+              <option value="{{ p.product_id }}">{{ p.product_id }} — {{ p.name }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">From (leave blank if inbound)</label>
+        <select class="form-select" name="from_location" {% if movement %}disabled{% endif %}>
+          <option value="">(none)</option>
+          {% for l in locations %}
+            <option value="{{ l.location_id }}" {% if movement and movement.from_location==l.location_id %}selected{% endif %}>{{ l.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">To (leave blank if outbound)</label>
+        <select class="form-select" name="to_location" {% if movement %}disabled{% endif %}>
+          <option value="">(none)</option>
+          {% for l in locations %}
+            <option value="{{ l.location_id }}" {% if movement and movement.to_location==l.location_id %}selected{% endif %}>{{ l.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label">Quantity</label>
+        <input type="number" min="1" class="form-control" name="qty" value="{{ movement.qty if movement else '' }}" {% if movement %}readonly{% endif %} required>
+      </div>
+
+      <div class="col-12">
+        {% if not readonly %}
+          <button class="btn btn-success"><i class="bi bi-save"></i> Record Movement</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('movements') }}">Cancel</a>
+        {% else %}
+          <a class="btn btn-outline-secondary" href="{{ url_for('movements') }}">Back</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+{% endblock %}

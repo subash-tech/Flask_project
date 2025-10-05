@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title or "Inventory Management" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+      :root {
+        --accent: #2563eb;
+        --muted: #6c757d;
+        --card-radius: 14px;
+      }
+      html,body { height:100%; }
+      body {
+        background: linear-gradient(180deg, #f8f9fc 0%, #eef3fb 100%);
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      }
+      .navbar { box-shadow: 0 6px 18px rgba(19, 38, 66, 0.06); border-bottom: 1px solid rgba(0,0,0,0.03); }
+      .card {
+        border: none;
+        border-radius: var(--card-radius);
+        box-shadow: 0 6px 18px rgba(18, 40, 71, 0.06);
+      }
+      .card:hover { transform: translateY(-4px); transition: .25s ease; }
+      .stat-number { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+      .muted { color: var(--muted); }
+      footer { text-align:center; padding: 1rem 0; color: #94a3b8; margin-top: 2.5rem; }
+      .search-input { max-width: 420px; }
+      .table-sm td, .table-sm th { padding: .55rem; vertical-align: middle; }
+      .card-ghost { background: transparent; border:none; box-shadow:none; }
+      /* animation */
+      .fade-in { animation: fadeIn .35s ease both; }
+      @keyframes fadeIn { from {opacity:0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+    </style>
+
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-white bg-white py-3">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+          <div class="bg-primary text-white rounded-3 p-2" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-box-seam fs-5"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Inventory</div>
+            <small class="text-muted">Manage products · locations · movements</small>
+          </div>
+        </a>
+
+        <div class="collapse navbar-collapse justify-content-end">
+          <ul class="navbar-nav align-items-center">
+            <li class="nav-item me-2">
+              <a class="nav-link" href="{{ url_for('products') }}"><i class="bi bi-bag me-1"></i>Products</a>
+            </li>
+            <li class="nav-item me-2">
+              <a class="nav-link" href="{{ url_for('locations') }}"><i class="bi bi-geo-alt me-1"></i>Locations</a>
+            </li>
+            <li class="nav-item me-2">
+              <a class="nav-link" href="{{ url_for('movements') }}"><i class="bi bi-arrow-left-right me-1"></i>Movements</a>
+            </li>
+            <li class="nav-item me-3">
+              <a class="nav-link" href="{{ url_for('balance') }}"><i class="bi bi-graph-up me-1"></i>Balance</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container my-4 fade-in">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-3">
+            {% for category, msg in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <small>Flask Inventory · Built with ♥ and Bootstrap · Add screenshots to README before submitting</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // auto-dismiss alerts after 3.5s
+      setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(a => {
+          try { bootstrap.Alert.getOrCreateInstance(a).close(); } catch(e) {}
+        });
+      }, 3500);
+    </script>
+    {% block body_extra %}{% endblock %}
+  </body>
+</html>
